@@ -1,19 +1,20 @@
-import { DragEventHandler } from "react";
+import { Card } from "../types/types";
+import CardBackImg from "./cardBackImg";
 
-export interface Card {
-    onDragStart?: DragEventHandler<HTMLDivElement>;
-}
-
-export function Card({ onDragStart }: Card) {
+export function Card({ rank, suit, face = false }: Card) {
     return (
-        <div
-            draggable
-            onDragStart={onDragStart}
-            className=" flex justify-between h-52 w-36 rounded-xl bg-slate-50 p-2 shadow-sm"
-        >
-            <p className="">A</p>
-            <p className="self-center text-2xl">&#9824;</p>
-            <p className="self-end">A</p>
-        </div>
+        <>
+            {face ? (
+                <div className="flex justify-between h-52 w-36 rounded-xl bg-slate-50 p-2 shadow-sm absolute">
+                    <p className="">{rank}</p>
+                    <p className="self-center text-2xl">{suit}</p>
+                    <p className="self-end">{rank}</p>
+                </div>
+            ) : (
+                <div className="flex justify-between h-52 w-36 rounded-xl bg-slate-50 p-2 shadow-sm absolute">
+                    <CardBackImg />
+                </div>
+            )}
+        </>
     );
 }
