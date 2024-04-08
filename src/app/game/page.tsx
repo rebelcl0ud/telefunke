@@ -3,58 +3,77 @@
 import { useState } from "react";
 import { Card } from "../ui/card";
 import Info from "../ui/info";
+import { RANKS, SUITS } from "../constants";
+import { Card as CardType } from "../types/types";
+import Button from "../ui/button";
+import clsx from "clsx";
 
 export default function Page() {
-    const [cards, setCards] = useState<string[]>([]);
-    console.log(cards);
+    const [cards, setCards] = useState<CardType[]>([]);
+    console.log("cards", cards);
 
-    const handleOnDrag = (e: React.DragEvent, cardType: Card) => {
-        const cardData = JSON.stringify({ cardType });
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", cardData);
-    };
+    function createDeck() {
+        const deck: CardType[] = [];
 
-    const handleOnDrop = (e: React.DragEvent) => {
-        const cardData = e.dataTransfer.getData("text/plain");
-        const parsedCardData = JSON.parse(cardData);
-        setCards([...cards, parsedCardData.cardType]);
-    };
+        SUITS.flatMap((suit: string) => {
+            RANKS.map((rank: string) => {
+                deck.push({ rank, suit });
+            });
+        });
 
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-    };
+        const shuffled2decks = [...deck, ...deck]
+            .sort(() => Math.random() - 0.5)
+            .map((card) => ({ ...card, id: Math.random() }));
+
+        setCards(shuffled2decks);
+    }
 
     return (
         <div className="flex relative h-full flex-col items-center justify-evenly bg-cameo">
             {/* decks */}
             <div className="flex">
-                <div className="mx-12">
-                    <Card onDragStart={(e) => handleOnDrag(e, {})} />
+                {/* discard */}
+                <div className="mx-12 relative right-24">
+                    {cards.length ? (
+                        <Card
+                            face
+                            rank={cards[cards.length - 1]?.rank}
+                            suit={cards[cards.length - 1]?.suit}
+                        />
+                    ) : null}
                 </div>
-                <div className="mx-12">
-                    <Card onDragStart={(e) => handleOnDrag(e, {})} />
+                {/* pickup */}
+                <div className="mx-12 relative">
+                    {cards.map((card, index) => {
+                        return <Card key={index} />;
+                    })}
                 </div>
             </div>
             {/* hand */}
-            <div
-                className="relative flex w-full h-52 justify-center md:px-6"
-                onDrop={handleOnDrop}
-                onDragOver={handleDragOver}
-            >
-                {cards.map((card, index) => (
-                    <Card key={index} />
-                ))}
+            <div className="relative flex w-full h-52 justify-center md:px-6">
+                {/* cards show up here after deal*/}
             </div>
             {/* player/game info */}
             <Info />
+            <div>
+                <Button
+                    disabled={cards.length ? true : false}
+                    className={clsx("bg-slate-100 mx-2 p-2 rounded-md", {
+                        "pointer-events-none opacity-50 cursor-not-allowed":
+                            cards.length,
+                    })}
+                    onClick={createDeck}
+                    text="new game"
+                />
+                <Button
+                    disabled
+                    className="bg-slate-100 mx-2 p-2 rounded-md pointer-events-none opacity-50 cursor-not-allowed"
+                    text=" deal"
+                />
+            </div>
         </div>
     );
 }
 
 // TODOS:
-// have a nav that can be used across any pages
-// container div
-// deck piles div
-// display hand div
-// info section div
-// drap drop
+// drap drop, look into libraries
